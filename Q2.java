@@ -13,7 +13,15 @@ public class Q2 {
         long lastAccessTime;
         RBNode left, right, parent;
 
-        public RBNode(int key, String value, long timestamp) {
+        public RBNode(int key, String value, long timestamp) { // initialization of constructor node
+            this.key = key;
+            this.value = value;
+            this.color = RED;
+            this.accessCount = 1;
+            this.lastAccessTime = timestamp;
+            this.left = null;
+            this.right = null;
+            this.parent = null;
         }
     }
 
