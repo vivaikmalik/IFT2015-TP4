@@ -1,6 +1,7 @@
 import java.util.*;
 
 public class Q2 {
+    private RBNode root;
 
     private static final boolean RED = true;
     private static final boolean BLACK = false;
@@ -23,13 +24,47 @@ public class Q2 {
             this.right = null;
             this.parent = null;
         }
+
     }
 
     public Q2() {
+        this.root = null; // initialization of constructor - root is null
     }
 
     public void insert(int key, String value, long timestamp) {
-        // TODO:
+        if (this.root == null) {
+            this.root = new RBNode(key, value, timestamp); // if root is null, create a new node
+            this.root.color = BLACK; // root is black
+            this.root.parent = null; // root has no parent
+        } else {
+            RBNode parentNode = null;
+            RBNode node = this.root;
+            while (node != null) {
+                parentNode = node;
+                if (key < node.key) {
+                    node = node.left;
+                } else if (key > node.key) {
+                    node = node.right;
+                } else { // cannot have duplicates in red black trees
+                    node.accessCount++;
+                    node.lastAccessTime = timestamp;
+                    return;
+                }
+            }
+            RBNode newNode = new RBNode(key, value, timestamp); // create a new node
+            newNode.parent = parentNode; // new node has no parent
+
+            if (key < parentNode.key) {
+                parentNode.left = newNode;
+            } else {
+                parentNode.right = newNode;
+            } // define the new left and right
+
+            this.fixInsert(newNode);
+        }
+        private void fixInsert(RBNode node) {
+            
+        }
     }
 
     public String get(int key, long timestamp) {
