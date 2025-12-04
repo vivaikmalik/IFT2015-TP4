@@ -1,8 +1,26 @@
+
+/*
+2 * ACADEMIC INTEGRITY ATTESTATION 
+3 *
+7 * [ ] I have used one or more generative AI tools. 
+8 * Details below:
+9 *
+10 * Tool(s) used: Gemini 3.0
+11 *
+12 * Reason(s) for use:
+13 * Gemini was used to help with certain methods in this class and to review the logic once the methods were created.
+14 * The methods that used Gemini have comments / docstrings in them that detail why / how it was used.
+15 *
+16 * Affected code sections:
+17 * ___________________________________________________
+18 * ___________________________________________________
+19 */
 import java.util.*;
 
 public class Q3 {
 
-    // Q1 - DONE (used:
+    // Q1 - DONE (used: gemini used to validate whether logic of method was correct
+    // after finished coding
     // https://www.reddit.com/r/learnprogramming/comments/1mob2k0/help_with_leetcode_hard_cat_and_mouse/)
 
     private static final int mouse_win = 1;
@@ -102,17 +120,48 @@ public class Q3 {
     }
 
     public static int minMovesToWin(int[][] graph, int player) {
-        gameResult(graph); // analyze game
+        gameResult(graph);
 
-        for (int i = 1; i < max_moves; i++) {
+        int win = (player == mouse_turn) ? mouse_win : cat_win;
+        int starmouse_pos = 1;
+        int startcat_pos = 2;
 
+        // win is before the last move (same as chess with checkmate). So if mouse wins
+        // by going to the winning box, then made 1 move. So that's odd.
+
+        for (int m = 0; m < 4 * graph.length + 200; m++) {
+            int result = cache[m][starmouse_pos][startcat_pos]; // modify logic from earlier to count the number of
+                                                                // moves
+            // first scenario its the mouse's turn
+            if (result == win) {
+                if (player == mouse_turn) { // mouse has even turns, so can win on an odd move. Also if moved last then
+                                            // it won, so check if number of moves is divisible by 2.
+                    if (m % 2 != 0) {
+                        return m;
+                    }
+                } else {
+                    if (m % 2 == 0) { // cat plays on odd number, if last to move it is an even move => wins on even
+                                      // move, return total number of displacements
+                        return m;
+                    }
+                }
+            }
+            return m;
         }
-
-        return -1;
+        return -1; // when impossible to win
     }
 
     // Q4 - DONE
     public static int gameResultFrom(int[][] graph, int mousePos, int catPos, boolean mouseTurn) {
+        gamegraph = graph;
+        cache = new int[4 * graph.length + 200][graph.length][graph.length];
+
+        for (int[][] m : cache) {
+            for (int[] row : m) {
+                Arrays.fill(row, -1);
+            }
+        }
+
         int whosturn = mouseTurn ? mouse_turn : cat_turn;
         return dp(mousePos, catPos, whosturn, 0);
     }
@@ -208,7 +257,10 @@ public class Q3 {
                 safenodes.add(i);
             isSafe = true;
         }
-        return safenodes;
+        return safenodes; // right now i am returning all nodes, including the node = 0. we do not know
+                          // how to fix this.
+        // i am assuming i can delete the node = 0 from the list of safenodes, but we
+        // are not exactly sure how
     }
 
 }

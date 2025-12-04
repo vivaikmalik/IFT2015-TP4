@@ -1,3 +1,20 @@
+
+/*
+2 * ACADEMIC INTEGRITY ATTESTATION 
+3 *
+7 * [ ] I have used one or more generative AI tools. 
+8 * Details below:
+9 *
+10 * Tool(s) used: Gemini 3.0
+11 *
+12 * Reason(s) for use:
+13 * Gemini was used to help with certain methods in this class and to review the logic once the methods were created.
+14 * The methods that used Gemini have comments / docstrings in them that detail why / how the LLM was used.
+15 *
+16 * Affected code sections:
+17 * ___________________________________________________
+18 * ___________________________________________________
+19 */
 import java.util.*;
 
 public class Q2 {
@@ -39,6 +56,7 @@ public class Q2 {
         } else {
             RBNode parentNode = null;
             RBNode node = this.root;
+
             while (node != null) {
                 parentNode = node;
                 if (key < node.key) {
@@ -49,20 +67,19 @@ public class Q2 {
                     node.accessCount++;
                     node.lastAccessTime = timestamp;
                     return;
-                }
+                } // while loop used to find parent of new node
             }
             RBNode newNode = new RBNode(key, value, timestamp); // create a new node
-            newNode.parent = parentNode; // new node has no parent
+            newNode.parent = parentNode; // initialize parent of new node as last node in the while loop
 
             if (key < parentNode.key) {
                 parentNode.left = newNode;
             } else {
                 parentNode.right = newNode;
-            } // define the new left and right
+            } // define as left or right child of parent, depending on key value
 
-            this.fixInsert(newNode);
+            this.fixInsert(newNode); // fix any red-black tree properties that may have been violated post insertion
         }
-
     }
 
     private void fixInsert(RBNode node) {
@@ -85,11 +102,12 @@ public class Q2 {
             RBNode uncle = grandParent.right == parent ? grandParent.left : grandParent.right; // uncle is the other
 
             if (uncle != null && uncle.color == RED) { // if uncle is red, simply do some recoloring, then recheck with
-                                                       // node = grandparent.node
+
                 parent.color = BLACK;
                 uncle.color = BLACK;
                 grandParent.color = RED;
-                node = grandParent;
+                node = grandParent; // node = grandparent.node, recheck with while loop. recolour if necesary. worst
+                                    // case: root stays black.
             } else { // if uncle is black or null
                 if (parent == grandParent.left) {
                     if (node == parent.right) { // if node is right child of parent, but parent is left child of
@@ -300,7 +318,11 @@ public class Q2 {
     }
 
     public int getBlackHeight() { // we have coded this function assuming that the Red-Black tree properties ARE
-                                  // ALL SATISFIED
+                                  // ALL SATISFIED. nothing specified in assignment. so i believe this is correct.
+                                  // anyways, all functions in this class fix red-black tree properties as they
+                                  // are called. thus, whenever this function is called, RBT properties will
+                                  // always be satisfied.
+                                  // so we can take the shortcut of just counting black nodes on leftmost path.
         if (this.root == null) {
             return 0;
         }
@@ -363,14 +385,19 @@ public class Q2 {
     }
 
     public List<Integer> getMostAccessedKeys(int k) {
-        Map<Integer, Integer> keyCountMap = new HashMap<>(); // initialize map
+        Map<Integer, Integer> keyCountMap = new HashMap<>(); // initialize HashMap
+
         collectMapOfKeyCounts(this.root, keyCountMap); // collect access counts recursively
         List<Integer> keys = new ArrayList<>(); // initialize list
+        // populate list with keys from map
         for (Map.Entry<Integer, Integer> entry : keyCountMap.entrySet()) {
             keys.add(entry.getKey()); // populate keys array from map
         }
-        keys.sort((a, b) -> keyCountMap.get(b) - keyCountMap.get(a)); // sort keys by access count
-        return keys.subList(0, Math.min(k, keys.size())); // return top k keys
+        // sort keys by access count
+        keys.sort((a, b) -> keyCountMap.get(b) - keyCountMap.get(a)); // gemini used to help with this sorting line of
+                                                                      // code
+        return keys.subList(0, Math.min(k, keys.size())); // return top k keys, or all keys if k is gretaer than the
+                                                          // size of the list
     }
 
     /// gemini used for this helper function which helps collect the key counts per
@@ -386,6 +413,8 @@ public class Q2 {
         keyCountMap.put(node.key, node.accessCount);
 
         collectMapOfKeyCounts(node.right, keyCountMap); // then check right subtree
+
+        // in order traversal : left, root, right
     }
 
     public void evictOldEntries(long currentTime, long maxAge) {
@@ -396,7 +425,7 @@ public class Q2 {
         }
         evictOldEntries(this.root, currentTime, maxAge, keysToDelete);
         for (int key : keysToDelete) {
-            this.delete(key);
+            this.delete(key); // use delete function to delete nodes from tree
         }
     }
 
@@ -409,7 +438,7 @@ public class Q2 {
             return;
         }
         evictOldEntries(node.left, currentTime, maxAge, keysToDelete);
-        if (node.lastAccessTime < currentTime - maxAge) {
+        if (currentTime - node.lastAccessTime > maxAge) {
             keysToDelete.add(node.key);
         }
         evictOldEntries(node.right, currentTime, maxAge, keysToDelete);
@@ -418,7 +447,8 @@ public class Q2 {
       // but gemini made me realize that i should add the keys to be deleted to a list
       // before deleting them all.
       // deleting while going recursively could restructure the tree, and cause errors
-      // etc.
+      // etc., would need to recheck all properties each time, and recheck which keys
+      // to delete each time
 
     public int countRedNodes() {
         return countRedNodes(this.root);
@@ -427,7 +457,7 @@ public class Q2 {
     private int countRedNodes(RBNode node) {
         /*
          * In order recursive traversal to count red nodes as requested in the PDF
-         * questionnaire. This helper function follows the same logis as the last 2
+         * questionnaire. This helper function follows the same logic as the last 2
          * helper functions above.
          */
         if (node == null) {
@@ -471,5 +501,4 @@ public class Q2 {
         getColorStatisticsByLevel(node.right, level + 1, map); // recursively check right subtree
         return map;
     }
-
 }
