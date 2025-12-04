@@ -198,7 +198,8 @@ public class Q3 {
         List<Integer> safenodes = new ArrayList<>();
         for (int i = 0; i < N; i++) {
             for (int j = 1; j < N; j++) {
-                if (dp(i, j, mouse_turn, 0) != mouse_win) { // if mouse can't win, it's not safe
+                if (dp(i, j, mouse_turn, 0) != mouse_win) { // if mouse can't win, it's not safe, mouse will not win,
+                                                            // so value should not be added to list
                     isSafe = false;
                     break;
                 }

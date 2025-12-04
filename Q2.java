@@ -66,6 +66,12 @@ public class Q2 {
     }
 
     private void fixInsert(RBNode node) {
+        /*
+         * 
+         * this helper function is used to fix the red-black tree properties after an
+         * element has been inserted
+         * 
+         */
         if (node == this.root) {
             node.color = BLACK;
             return;
@@ -78,56 +84,185 @@ public class Q2 {
             RBNode grandParent = parent.parent; // if parent is red, grandparent must exist (root cannot be red)
             RBNode uncle = grandParent.right == parent ? grandParent.left : grandParent.right; // uncle is the other
 
-            if (uncle != null && uncle.color == RED) {
+            if (uncle != null && uncle.color == RED) { // if uncle is red, simply do some recoloring, then recheck with
+                                                       // node = grandparent.node
                 parent.color = BLACK;
                 uncle.color = BLACK;
                 grandParent.color = RED;
                 node = grandParent;
-            } else {
-                if (node == parent.left && parent == grandParent.left) {
-                    this.rotateRight(parent);
+            } else { // if uncle is black or null
+                if (parent == grandParent.left) {
+                    if (node == parent.right) { // if node is right child of parent, but parent is left child of
+                                                // grandparent: L-R situation
+                        node = parent; // update node to parent for rotation
+                        leftRotate(node); // rotate left around parent so that we have L-L
+                        parent = node.parent; // update parent of node
+                        grandParent = parent.parent; // update grandparent to node
+
+                    }
+                    // if code does not go into above if. we have L-L situation. this is the normal
+                    // case. simply recolour and rotate.
+                    parent.color = BLACK; // recolor parent to black
+                    grandParent.color = RED; // recolor grandparent to red
+                    rightRotate(grandParent); // rotate right around grandparent since now in L-L situation
+                } else {
+                    // below we have mirror situation of above scenario. R-L situation - no comments
+                    // necessary
+                    if (node == parent.right) {
+                        node = parent;
+                        rightRotate(node);
+                        parent = node.parent;
+                        grandParent = parent.parent;
+
+                    }
                     parent.color = BLACK;
+                    grandParent.color = RED;
+                    leftRotate(grandParent);
                 }
-                if (node == parent.right && parent == grandParent.right) {
-                    this.rotateLeft(parent);
-                    parent.color = BLACK;
-                }
-                if (node == parent.left && parent == grandParent.right) {
-                    this.rotateRight(parent);
-                    this.rotateLeft(grandParent);
-                    node.color = BLACK;
-                }
-                if (node == parent.right && parent == grandParent.left) {
-                    this.rotateLeft(parent);
-                    this.rotateRight(grandParent);
-                    node.color = BLACK;
-                }
+
             }
         }
+    }
+
+    private void leftRotate(RBNode node) {
+        /*
+         * 
+         * this helper function is used to rotate the tree to the left
+         * 
+         */
+        if (node == null || node.right == null)
+            return; // this ensures that the node is not null and has a right child
+
+        RBNode rightChild = node.right; // assign right child value
+        node.right = rightChild.left; // assign left subtree of right child to right of OG node
+
+        if (rightChild.left != null) {
+            rightChild.left.parent = node; // update parent of left subtree of right child of OG node
+        }
+        rightChild.parent = node.parent; // update parent of right child of OG node
+
+        if (node.parent == null) {
+            this.root = rightChild; // update root pointer if OG node is root
+        } // this needs to be checked before the else if below
+
+        else if (node == node.parent.left) {
+            node.parent.left = rightChild; // if OG node left child of parent, update pointer so that it now points to
+                                           // the right child
+        }
+
+        else {
+            node.parent.right = rightChild; // if OG node right child of parent, update pointer so that it now points
+                                            // to the right child
+        }
+        rightChild.left = node; // OG node now left child of right child
+        node.parent = rightChild; // update parent pointer of OG node
+    }
+
+    private void rightRotate(RBNode node) {
+        /*
+         * 
+         * this helper function is used to rotate the tree to the right
+         * there are no comments below since it is the EXACT SAME AS THE FUNCTION ABOVE,
+         * just mirrored
+         */
+        if (node == null || node.left == null)
+            return;
+
+        RBNode leftChild = node.left;
+        node.left = leftChild.right;
+
+        if (leftChild.right != null) {
+            leftChild.right.parent = node;
+        }
+        leftChild.parent = node.parent;
+
+        if (node.parent == null) {
+            this.root = leftChild;
+        }
+
+        else if (node == node.parent.left) {
+            node.parent.left = leftChild;
+        }
+
+        else {
+            node.parent.right = leftChild;
+        }
+        leftChild.right = node;
+        node.parent = leftChild;
     }
 
     public String get(int key, long timestamp) {
         if (this.root == null) {
-            return null;
+            return null; // if root is null, return null
         }
         RBNode node = this.root;
         while (node != null) {
             if (key < node.key) {
-                node = node.left;
+                node = node.left; // if key is less than node key, move to left child
             } else if (key > node.key) {
-                node = node.right;
+                node = node.right; // if key is greater than node key, move to right child
             } else {
-                node.accessCount++;
-                node.lastAccessTime = timestamp;
-                return node.value;
+                node.accessCount++; // increment accessCount
+                node.lastAccessTime = timestamp; // update lastAccessTime
+                return node.value; // return value
             }
         }
-        return null;
+        return null; // if not found, return null (key does not exist)
     }
 
     public boolean delete(int key) {
-        // TODO:
+        /*
+         * 
+         * this function is used to delete a node from the red-black tree
+         * for this function, we need
+         * 1 - finding the node that will replace the deleted node
+         * 2 - deleting the node
+         * 3 - fixing the red-black tree properties. this will all be done through
+         * different helper functions
+         * 
+         */
+
         return false;
+    }
+
+    private RBNode findSuccessor(RBNode node) {
+        /*
+         * 
+         * this helper function is used to find the successor WHEN THERE ARE TWO
+         * CHILDREN of the node to be deleted
+         * in fact, if note to be deleted is a leaf nothing to be done, except for
+         * checking RBT properties
+         * if node has one child, we can just replace it with its child
+         * if node has two children, we need to find the successor.
+         * this method assumes that node will be repalced by smallest node in right
+         * subtree
+         * 
+         */
+        if (node == null) {
+            return null;
+        }
+        // Traverse down the leftmost path
+        while (node.left != null) {
+            node = node.left;
+        }
+        return node;
+    }
+
+    private void replaceSubtree(RBNode node, RBNode child) {
+        /*
+         * 
+         * this helper function is used to repalce the subtree with node to be deleted,
+         * with the subtree of child
+         * 
+         */
+        if (node.parent == null) {
+            this.root = child; // if node is root, update root pointer to child
+        } else if (node == node.parent.left) {
+            node.parent.left = child; // if node is left child, then update parent's left child to subtree
+        } else {
+            node.parent.right = child; // if node is right child, then update parent's right child to subtree
+        }
+        child.parent = node.parent; // update child's parent pointer to node's parent
     }
 
     public List<String> getRangeValues(int minKey, int maxKey) {
@@ -135,21 +270,37 @@ public class Q2 {
             return new ArrayList<>();
         }
         List<String> values = new ArrayList<>();
-        RBNode node = this.root;
-        while (node != null) { // end while loop when node is null (end of tree)
-            if (node.key < minKey) {
-                node = node.right; // if current node is less than the min, go to the right
-            } else if (node.key > maxKey) {
-                node = node.left; // if current node is greater than the max, go to the left
-            } else {
-                values.add(node.value); // if current node is between min and max, add it to the list
-                node = node.right; // go to the right
-            }
-        }
+        getRangeValuesHelper(this.root, minKey, maxKey, values);
         return values;
     }
 
-    public int getBlackHeight() {
+    private void getRangeValuesHelper(RBNode node, int minKey, int maxKey, List<String> values) {
+        /*
+         * 
+         * this helper function is used to get the values of the nodes in the range. it
+         * uses a recursive in order traversal of the tree
+         * this ensures that the values are returned in the sorted order required in the
+         * question
+         * LEFT SUBTREE -> ROOT -> RIGHT SUBTREE
+         */
+        if (node == null) { // exit if null node is null
+            return;
+        }
+        if (node.key > minKey) { // if node key is greater than the min. there could be possible values in left
+                                 // subtree smaller than minKey
+            getRangeValuesHelper(node.left, minKey, maxKey, values);
+        }
+        if (node.key >= minKey && node.key <= maxKey) {
+            values.add(node.value);
+        }
+        if (node.key < maxKey) { // if node key is smaller than the max. there could be possible values in right
+                                 // subtree greater than maxKey
+            getRangeValuesHelper(node.right, minKey, maxKey, values);
+        }
+    }
+
+    public int getBlackHeight() { // we have coded this function assuming that the Red-Black tree properties ARE
+                                  // ALL SATISFIED
         if (this.root == null) {
             return 0;
         }
@@ -159,7 +310,7 @@ public class Q2 {
             if (node.color == BLACK) { // if current node is black, increment black height
                 blackHeight++;
             }
-            node = node.left; // go to the left. all paths will have same number of black nodes since
+            node = node.left; // go to the left. all paths will have same number of black nodes since this is
                               // red-black tree property
         }
         return blackHeight;
@@ -172,10 +323,11 @@ public class Q2 {
         if (this.root.color != BLACK) { // root must be black
             return false;
         }
-        if (RBTverifyProperties(this.root) == -1) {
+        if (RBTverifyProperties(this.root) == -1) { // if RBTverifyProperties returns -1, then it is not a valid
+                                                    // red-black tree
             return false;
         }
-        return true;
+        return true; // if all properties are satisfied, return true
     }
 
     private int RBTverifyProperties(RBNode node) {
