@@ -290,25 +290,33 @@ public class Q2 {
     }
 
     public Map<String, Integer> getColorStatisticsByLevel() {
-        Map<String, Integer> statisticsMap = new TreeMap<>();
+        Map<String, Integer> map = new TreeMap<>(); // initialize a tree map
 
-        return getColorStatisticsByLevel(this.root);
+        return getColorStatisticsByLevel(this.root, 0, map); // start recursivity at level = 0
     }
 
-    private Map<String, Integer> getColorStatisticsByLevel(RBNode node) {
+    private Map<String, Integer> getColorStatisticsByLevel(RBNode node, int level, Map<String, Integer> map) {
         /*
-         * In order recursive traversal to count red nodes as requested in the PDF
-         * questionnaire. This helper function follows the same logis as the last 2
-         * helper functions above.
+         * Recursive method to cound red notes at each level. This uses a tree map to
+         * store the results.
+         * The map is sorted by key (level) in ascending order. The inputs are the node
+         * to start at, the level of the node, and the map containing the current counts
+         * 
          */
         if (node == null) {
-            return new HashMap<>();
+            return map;
         }
-        Map<String, Integer> map = getColorStatisticsByLevel(node.left);
         if (node.color == RED) {
-            map.put("RED", map.getOrDefault("RED", 0) + 1);
+            String levelString = String.valueOf(level); // convert to string like PDF states
+
+            if (map.get(levelString) == null) { // check if key exists. if not create it and set value to 1
+                map.put(levelString, 1);
+            } else {
+                map.put(levelString, map.get(levelString) + 1); // if key exists, increment value by 1
+            }
         }
-        map.putAll(getColorStatisticsByLevel(node.right));
+        getColorStatisticsByLevel(node.left, level + 1, map); // recursively check left subtree
+        getColorStatisticsByLevel(node.right, level + 1, map); // recursively check right subtree
         return map;
     }
 
